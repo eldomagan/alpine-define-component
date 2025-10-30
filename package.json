@@ -1,0 +1,49 @@
+{
+  "name": "alpine-define-component",
+  "version": "0.0.0",
+  "description": "A structured component system for Alpine.js with parts/slots support",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "playground": "vite playground",
+    "playground:build": "vite build playground",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "alpinejs",
+    "alpine",
+    "components",
+    "alpine-components",
+    "alpine-plugin"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "alpinejs": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/alpinejs": "^3.13.11",
+    "alpinejs": "^3.15.1",
+    "happy-dom": "^20.0.10",
+    "typescript": "^5.0.0",
+    "vite": "^7.1.12",
+    "vitest": "^4.0.5"
+  }
+}

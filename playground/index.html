@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>alpine-define-component Playground</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>alpine-define-component Playground</h1>
+      <p class="subtitle">Interactive examples of Alpine.js components with TypeScript support</p>
+
+      <!-- Counter Component -->
+      <section class="demo-section">
+        <h2>Counter Component</h2>
+        <p>Basic counter with Alpine magics ($dispatch, $watch)</p>
+
+        <div x-counter="{ count: 0 }" class="demo-box">
+          <div x-counter:display class="counter-display"></div>
+          <div class="button-group">
+            <button x-counter:increment-btn class="btn btn-primary">Increment</button>
+            <button @click="$counter.decrement()" class="btn">Decrement</button>
+            <button @click="$counter.reset()" class="btn btn-secondary">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabs Component -->
+      <section class="demo-section">
+        <h2>Tabs Component</h2>
+        <p>Tabs with history tracking and URL sync</p>
+
+        <div x-tabs="{ defaultTab: 'home' }" class="demo-box">
+          <div class="tabs-header">
+            <button x-tabs:button="'home'" class="tab-btn">Home</button>
+            <button x-tabs:button="'profile'" class="tab-btn">Profile</button>
+            <button x-tabs:button="'settings'" class="tab-btn">Settings</button>
+            <button @click="$tabs.goBack()" class="btn btn-sm" style="margin-left: auto;">← Back</button>
+          </div>
+
+          <div class="tabs-content">
+            <div x-tabs:panel="'home'" class="tab-panel">
+              <h3>Home Tab</h3>
+              <p>Welcome to the home tab! This is the default tab.</p>
+            </div>
+            <div x-tabs:panel="'profile'" class="tab-panel">
+              <h3>Profile Tab</h3>
+              <p>Your profile information goes here.</p>
+            </div>
+            <div x-tabs:panel="'settings'" class="tab-panel">
+              <h3>Settings Tab</h3>
+              <p>Configure your settings here.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modal Component -->
+      <section class="demo-section">
+        <h2>Modal Component</h2>
+        <p>Modal with backdrop click handling and $nextTick focus management</p>
+
+        <div x-modal="{ open: false }">
+          <button x-modal:trigger class="btn btn-primary">Open Modal</button>
+
+          <div x-modal:backdrop class="modal-backdrop">
+            <div x-modal:content class="modal-content">
+              <h3>Modal Title</h3>
+              <p>This is a modal dialog. Click the backdrop or close button to dismiss.</p>
+              <input type="text" placeholder="Type something..." class="input" />
+              <div class="button-group">
+                <button x-modal:close-trigger class="btn btn-secondary">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./app.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+name: Release & Publish
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Debug: Print all outputs
+      - name: Debug outputs
+        run: |
+          echo "release_created: ${{ steps.release.outputs.release_created }}"
+          echo "releases_created: ${{ steps.release.outputs.releases_created }}"
+          echo "tag_name: ${{ steps.release.outputs.tag_name }}"
+
+      # Checkout code only when a release is created
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.releases_created }}
+
+      # Setup Node.js with npm registry
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+        if: ${{ steps.release.outputs.releases_created }}
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
+        if: ${{ steps.release.outputs.releases_created }}
+
+      # Build and test (prepublishOnly will run these)
+      - name: Build package
+        run: npm run build
+        if: ${{ steps.release.outputs.releases_created }}
+
+      - name: Run tests
+        run: npm test
+        if: ${{ steps.release.outputs.releases_created }}
+
+      # Publish to npm
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: ${{ steps.release.outputs.releases_created }}
