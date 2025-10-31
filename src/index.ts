@@ -32,24 +32,18 @@ type SetupWithMagics<T> = (
     : T[K];
 };
 
-type GenericSetupFn = (props: any, ctx: SetupContext) => any;
-
-type InferApi<S extends GenericSetupFn> = ReturnType<S>;
-
-type WithScope<Api, ScopeName extends string, Scope> = Api & {
-  [K in `$${ScopeName}`]: Scope;
-};
-
-export interface ComponentConfig<TSetup extends GenericSetupFn = GenericSetupFn> {
+export interface ComponentConfig<TApi> {
   name: string;
-  setup: TSetup;
-  parts?: Record<string, PartHandler<InferApi<TSetup>>>;
+  setup: (props: any, ctx: SetupContext) => TApi;
+  parts?: Record<string, PartHandler<TApi>>;
 }
 
 /**
  * TypeScript helper for typing Alpine magics (`$dispatch`, `$watch`, etc.) in methods.
  */
-export function setup<T extends Record<string, any>>(fn: SetupWithMagics<T>): (props: any, ctx: SetupContext) => T {
+export function setup<T extends Record<string, any>>(
+  fn: SetupWithMagics<T>
+): ((props: any, ctx: SetupContext) => T) & { __returnType?: T } {
   return fn as any;
 }
 
@@ -60,7 +54,9 @@ function toCamelCase(input: string): string {
     .replace(/^[A-Z]/, (char) => char.toLowerCase());
 }
 
-export function defineComponent<TSetup extends GenericSetupFn>(config: ComponentConfig<TSetup>) {
+export function defineComponent<TApi>(
+  config: ComponentConfig<TApi>
+): (Alpine: AlpineType) => void {
   const { name, setup, parts } = config;
 
   return (Alpine: AlpineType) => {
@@ -129,9 +125,9 @@ export function defineComponent<TSetup extends GenericSetupFn>(config: Component
 
 export function defineScope<Api, ScopeName extends string, Scope>(options: {
   name: ScopeName;
-  setup: (api: Api, el: HTMLElement, ctx: PartContext) => Scope;
+  setup: (api: WithAlpineMagics<Api>, el: HTMLElement, ctx: PartContext) => Scope;
   bindings?: (api: WithAlpineMagics<Api>, scope: Scope) => Record<string, any>;
-}): (api: WithScope<Api, ScopeName, Scope>, el: HTMLElement, ctx: PartContext) => Record<string, any> {
+}): PartHandler<Api> {
   return (api, el, ctx) => {
     const prefix = useId(options.name);
     const generateId = (part: string) => {
@@ -140,11 +136,11 @@ export function defineScope<Api, ScopeName extends string, Scope>(options: {
 
     const scope = ctx.Alpine.reactive(options.setup(api, el, { ...ctx, generateId }));
 
-    const key = `$${options.name}` as keyof typeof api;
+    const key = `$${options.name}`;
 
     return {
       'x-data': () => ({ [key]: scope }),
-      ...(options.bindings?.(api as WithAlpineMagics<Api>, scope) ?? {}),
+      ...(options.bindings?.(api, scope) ?? {}),
     };
   };
 }

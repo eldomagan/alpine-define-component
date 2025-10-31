@@ -145,7 +145,7 @@ Creates an isolated reactive scope for component parts.
 
 ```typescript
 defineScope({
-  name: string,                        // Scope name (accessible as $name)
+  name: string,                        // Scope name (accessible as $name in template)
   setup: (api, el, ctx) => {...},      // Returns scope data
   bindings?: (api, scope) => {...}     // Optional Alpine bindings
 })

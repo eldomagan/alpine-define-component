@@ -1,4 +1,3 @@
-import { headers } from './../../node_modules/happy-dom/src/PropertySymbol';
 import { defineComponent, setup } from '../../src/index';
 
 export const counter = defineComponent({
