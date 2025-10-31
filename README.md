@@ -157,6 +157,11 @@ defineScope({
 
 Type helper for Alpine magics in methods.
 
+## Inspiration
+
+- [@alpine/ui](https://alpinejs.dev/components#headless)
+- [alpine-zag](https://github.com/TunkShif/alpine-zag)
+
 ## License
 
 MIT
