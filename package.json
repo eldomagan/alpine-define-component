@@ -1,6 +1,6 @@
 {
   "name": "alpine-define-component",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A structured component system for Alpine.js with parts/slots support",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
