@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.0.1...alpine-define-component-v1.0.2) (2025-10-31)
+
+
+### Bug Fixes
+
+* improve type inference for api parameter in part handlers ([f5f7445](https://github.com/eldomagan/alpine-define-component/commit/f5f74457b22de7701696c2d251c12930a985fe31))
+
 ## [1.0.1](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.0.0...alpine-define-component-v1.0.1) (2025-10-31)
 
 
