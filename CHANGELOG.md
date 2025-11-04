@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.0.2...alpine-define-component-v1.1.0) (2025-11-04)
+
+
+### Features
+
+* add parts-as-function pattern for scopes typing ([35e57c6](https://github.com/eldomagan/alpine-define-component/commit/35e57c6bbf339c76593bc2e53af295677fd1f9d0))
+
 ## [1.0.2](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.0.1...alpine-define-component-v1.0.2) (2025-10-31)
 
 
