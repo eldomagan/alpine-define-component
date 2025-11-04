@@ -110,13 +110,8 @@ const tabs = defineComponent({
   <button x-tabs:item="'tab1'" x-text="$tabItem.isActive() ? 'Active' : 'Tab 1'">
     Tab 1
   </button>
-
   <button x-tabs:item="'tab2'" x-text="$tabItem.isActive() ? 'Active' : 'Tab 2'">
     Tab 2
-  </button>
-
-  <button x-tabs:item="'tab3'" x-text="$tabItem.isActive() ? 'Active' : 'Tab 3'">
-    Tab 3
   </button>
 </div>
 ```
@@ -126,6 +121,44 @@ const tabs = defineComponent({
 - Access parent API and scope data together
 - Scope available as `$scopeName` magic in HTML
 - Perfect for lists, tabs, accordions, menu items, etc.
+
+### Scope Typing (TypeScript)
+
+For full type safety with scopes, use the parts-as-function pattern with `withScopes`:
+
+```typescript
+import { defineComponent, defineScope, setup } from 'alpine-define-component';
+
+const accordion = defineComponent({
+  name: 'accordion',
+  setup: setup(() => ({
+    openItems: [] as string[],
+    toggle(itemId: string) { /* ... */ },
+    isOpen(itemId: string) { /* ... */ },
+  })),
+
+  parts: ({ withScopes }) => withScopes<{
+    $item: { id: string; isOpen: boolean; toggle: () => void };
+  }>({
+    item: defineScope({
+      name: 'item',
+      setup: (api, _, { value: itemId }) => ({
+        id: itemId,
+        isOpen: api.isOpen(itemId),
+        toggle() { api.toggle(itemId); },
+      }),
+    }),
+
+    header(api) {
+      // api.$item is correctly typed (from withScopes)
+      return {
+        'x-on:click': () => api.$item.toggle(),
+        'x-bind:class': () => ({ open: api.$item.isOpen }),
+      };
+    },
+  }),
+});
+```
 
 ## API
 

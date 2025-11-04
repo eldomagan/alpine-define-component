@@ -32,10 +32,10 @@ type SetupWithMagics<T> = (
     : T[K];
 };
 
-export interface ComponentConfig<TApi> {
+export interface ComponentConfig<TApi, TParts = Record<string, PartHandler<TApi>>> {
   name: string;
   setup: (props: any, ctx: SetupContext) => TApi;
-  parts?: Record<string, PartHandler<TApi>>;
+  parts?: TParts | ((helpers: { withScopes: ReturnType<typeof withScopes<TApi>> }) => TParts);
 }
 
 /**
@@ -54,10 +54,16 @@ function toCamelCase(input: string): string {
     .replace(/^[A-Z]/, (char) => char.toLowerCase());
 }
 
-export function defineComponent<TApi>(
-  config: ComponentConfig<TApi>
+export function defineComponent<TApi, TParts extends Record<string, PartHandler<any>> = Record<string, PartHandler<TApi>>>(
+  config: ComponentConfig<TApi, TParts>
 ): (Alpine: AlpineType) => void {
-  const { name, setup, parts } = config;
+  const { name, setup } = config;
+
+  const partsConfig = config.parts;
+  const parts: Record<string, PartHandler<any>> | undefined =
+    typeof partsConfig === 'function'
+      ? partsConfig({ withScopes: withScopes<TApi>() })
+      : partsConfig;
 
   return (Alpine: AlpineType) => {
     Alpine.magic(toCamelCase(name), (el) => Alpine.$data(el));
@@ -142,5 +148,13 @@ export function defineScope<Api, ScopeName extends string, Scope>(options: {
       'x-data': () => ({ [key]: scope }),
       ...(options.bindings?.(api, scope) ?? {}),
     };
+  };
+}
+
+export function withScopes<TApi>() {
+  return <TScopes extends Record<string, any>>(
+    parts: Record<string, PartHandler<TApi & TScopes>>
+  ): Record<string, PartHandler<TApi & TScopes>> => {
+    return parts;
   };
 }
