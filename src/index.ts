@@ -1,5 +1,8 @@
 import type { Magics as AlpineMagics, Alpine as AlpineType } from 'alpinejs';
-import { useId } from './use-id';
+import { useId, resetIds } from './use-id';
+export { resetIds };
+
+export const INTERNALS = Symbol('alpine-define-component');
 
 export interface PartContext {
   value: any;
@@ -32,7 +35,7 @@ type SetupWithMagics<T> = (
     : T[K];
 };
 
-export interface ComponentConfig<TApi, TParts = Record<string, PartHandler<TApi>>> {
+export interface ComponentConfig<TApi extends object, TParts = Record<string, PartHandler<TApi>>> {
   name: string;
   setup: (props: any, ctx: SetupContext) => TApi;
   parts?: TParts | ((helpers: { withScopes: ReturnType<typeof withScopes<TApi>> }) => TParts);
@@ -51,10 +54,10 @@ function toCamelCase(input: string): string {
   return input
     .trim()
     .replace(/[-_\s]+(.)?/g, (_, char) => (char ? char.toUpperCase() : ''))
-    .replace(/^[A-Z]/, (char) => char.toLowerCase());
+    .replace(/^[A-Z]+/, (chars) => chars.toLowerCase());
 }
 
-export function defineComponent<TApi, TParts extends Record<string, PartHandler<any>> = Record<string, PartHandler<TApi>>>(
+export function defineComponent<TApi extends object, TParts extends Record<string, PartHandler<any>> = Record<string, PartHandler<TApi>>>(
   config: ComponentConfig<TApi, TParts>
 ): (Alpine: AlpineType) => void {
   const { name, setup } = config;
@@ -70,15 +73,18 @@ export function defineComponent<TApi, TParts extends Record<string, PartHandler<
 
     Alpine.addRootSelector(() => `[${Alpine.prefixed(name)}]`);
 
-    Alpine.directive(name, (el, { value: partName, expression, modifiers }, { evaluateLater, cleanup }) => {
+    Alpine.directive(name, (el, { value: partName, expression, modifiers }, { evaluateLater, effect, cleanup }) => {
       const safeEvaluate = expression.trim() ? evaluateLater(expression) : (cb: (arg0: any) => any) => cb(null);
-      safeEvaluate((value: any) => {
-        if (!partName) {
+
+      if (!partName) {
+        safeEvaluate((value: any) => {
           const instanceId = useId(name);
           const generateId = (part: string) => `${instanceId}:${part}`;
 
-          const api = Alpine.reactive(setup(value || {}, { Alpine, generateId }));
-          (api as any)._generateId = generateId;
+          const props = (value != null && typeof value === 'object' && !Array.isArray(value)) ? value : {};
+          const rawApi = setup(props, { Alpine, generateId });
+          (rawApi as any)[INTERNALS] = { generateId, scopeCounters: {} as Record<string, number> };
+          const api = Alpine.reactive(rawApi);
 
           Alpine.bind(el, {
             'x-id': () => [name],
@@ -100,30 +106,41 @@ export function defineComponent<TApi, TParts extends Record<string, PartHandler<
           }
 
           return;
-        }
-
-        const camelPartName = toCamelCase(partName);
-        const handler = parts ? parts[camelPartName] : null;
-
-        if (!handler) return;
-
-        const api = Alpine.$data(el);
-        const generateId = (api as any)._generateId;
-
-        const context: PartContext = {
-          value,
-          modifiers,
-          Alpine,
-          cleanup,
-          generateId,
-        };
-
-        const bindings = handler.call(api as any, api as any, el, context) ?? {};
-
-        Alpine.bind(el, {
-          'data-part': partName,
-          ...bindings,
         });
+
+        return;
+      }
+
+      const camelPartName = toCamelCase(partName);
+      const handler = parts ? parts[camelPartName] : null;
+
+      if (!handler) return;
+
+      const api = Alpine.$data(el);
+      const internals = (api as any)[INTERNALS];
+
+      if (!internals) {
+        return;
+      }
+
+      const { generateId } = internals;
+
+      const reactiveCtx = Alpine.reactive({ value: undefined as any });
+      effect(() => safeEvaluate((value: any) => { reactiveCtx.value = value; }));
+
+      const context: PartContext = {
+        get value() { return reactiveCtx.value; },
+        modifiers,
+        Alpine,
+        cleanup,
+        generateId,
+      };
+
+      const bindings = handler.call(api as any, api as any, el, context) ?? {};
+
+      Alpine.bind(el, {
+        'data-part': partName,
+        ...bindings,
       });
     }).before('bind');
   };
@@ -135,7 +152,13 @@ export function defineScope<Api, ScopeName extends string, Scope>(options: {
   bindings?: (api: WithAlpineMagics<Api>, scope: Scope) => Record<string, any>;
 }): PartHandler<Api> {
   return (api, el, ctx) => {
-    const prefix = useId(options.name);
+    const internals = (api as any)[INTERNALS];
+    if (!internals) {
+      throw new Error(`defineScope("${options.name}"): component internals not found. Is this handler used inside a defineComponent?`);
+    }
+    const counters = internals.scopeCounters;
+    counters[options.name] = (counters[options.name] || 0) + 1;
+    const prefix = `${options.name}-${counters[options.name]}`;
     const generateId = (part: string) => {
       return ctx.generateId(`${prefix}:${part}`);
     };

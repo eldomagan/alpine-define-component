@@ -8,3 +8,7 @@ export function useId(prefix = 'id'): string {
 
   return `${prefix}-${next}`;
 }
+
+export function resetIds(): void {
+  counters.clear();
+}
