@@ -28,11 +28,13 @@ export const tabs = defineComponent({
       if (this.history.length > 1) {
         this.history.pop();
         const previous = this.history[this.history.length - 1];
-        this.setTab(previous);
+        this.activeTab = previous;
+        this.$dispatch('tab-changed', { tab: previous });
       }
     },
 
     init() {
+      this.addToHistory(this.activeTab);
       this.$watch('activeTab', (value: string) => {
         console.log('Active tab:', value);
 

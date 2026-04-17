@@ -38,7 +38,7 @@ export const accordion = defineComponent({
       name: 'item',
       setup: (api, _, { value: itemId }) => ({
         id: itemId,
-        isOpen: api.isOpen(itemId),
+        get isOpen() { return api.isOpen(itemId); },
         toggle() {
           api.toggle(itemId);
         },

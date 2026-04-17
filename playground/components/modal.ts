@@ -14,7 +14,7 @@ export const modal = defineComponent({
       this.$dispatch('modal:opened');
 
       this.$nextTick(() => {
-        const firstInput = this.$el.querySelector('input, button');
+        const firstInput = document.querySelector('[x-modal\\:content] input, [x-modal\\:content] button');
         (firstInput as HTMLElement)?.focus();
       });
     },
