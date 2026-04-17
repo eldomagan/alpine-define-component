@@ -33,13 +33,23 @@
     "alpine-components",
     "alpine-plugin"
   ],
-  "author": "",
+  "author": "Eldo Magan",
   "license": "MIT",
+  "sideEffects": false,
   "peerDependencies": {
+    "@types/alpinejs": "^3.13.0",
     "alpinejs": "^3.0.0"
   },
+  "peerDependenciesMeta": {
+    "@types/alpinejs": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@alpinejs/morph": "^3.15.11",
     "@types/alpinejs": "^3.13.11",
+    "@types/alpinejs__morph": "^3.13.5",
+    "@vitest/coverage-v8": "^4.1.4",
     "alpinejs": "^3.15.1",
     "happy-dom": "^20.0.10",
     "typescript": "^5.0.0",

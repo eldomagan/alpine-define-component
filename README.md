@@ -160,6 +160,48 @@ const accordion = defineComponent({
 });
 ```
 
+## Root Part
+
+The `parts.root` handler is a special case: its bindings are applied directly to the root component element, not to a child part. This is useful for setting ARIA attributes, keyboard handlers, or other bindings on the component root itself.
+
+```typescript
+const dialog = defineComponent({
+  name: 'dialog',
+  setup: () => ({
+    open: false,
+    close() { this.open = false; },
+  }),
+  parts: {
+    root(api) {
+      return {
+        'x-bind:role': () => 'dialog',
+        'x-bind:aria-expanded': () => api.open,
+        'x-on:keydown.escape': () => api.close(),
+      };
+    },
+    content() {
+      return { 'x-on:click.stop': () => {} };
+    },
+  },
+});
+```
+
+## Component Magic
+
+When you define a component with `name: 'modal'`, the library registers an Alpine magic called `$modal` (camelCased from the component name). This magic returns the component's API from any descendant element.
+
+```html
+<div x-modal>
+  <!-- $modal is available here because this element is inside x-modal -->
+  <button x-on:click="$modal.open()">Open</button>
+
+  <!-- Also available inside nested elements -->
+  <div>
+    <span x-text="$modal.isOpen"></span>
+  </div>
+</div>
+```
+
 ## API
 
 ### `defineComponent(config)`
@@ -189,6 +231,27 @@ defineScope({
 ### `setup(fn)` (TypeScript)
 
 Type helper for Alpine magics in methods.
+
+### SetupContext
+
+The second argument passed to `setup(props, ctx)`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `Alpine` | `AlpineType` | The Alpine instance, for accessing `Alpine.reactive()`, `Alpine.effect()`, etc. |
+| `generateId` | `(prefix: string) => string` | Generate a unique ID scoped to the component instance |
+
+### PartContext
+
+The third argument passed to part handlers `(api, el, ctx)`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `value` | `any` | The evaluated expression from the directive (e.g., `x-accordion:item="'item-1'"` passes `'item-1'`) |
+| `modifiers` | `string[]` | Directive modifiers (e.g., `x-accordion:item.lazy` passes `['lazy']`) |
+| `Alpine` | `AlpineType` | The Alpine instance |
+| `cleanup` | `(cb: () => void) => void` | Register a cleanup callback that runs when the element is removed from the DOM |
+| `generateId` | `(prefix: string) => string` | Generate a unique ID scoped to the component instance (e.g., `accordion-1:panel`) |
 
 ## Inspiration
 
