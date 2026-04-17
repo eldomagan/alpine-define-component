@@ -1,18 +1,5 @@
 # Changelog
 
-## [1.2.0](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.1.0...alpine-define-component-v1.2.0) (2026-04-17)
-
-
-### Features
-
-* add carousel component and standalone demo entry points ([99484ec](https://github.com/eldomagan/alpine-define-component/commit/99484ec9bc2a7e15339a548d51398361ca06d4bb))
-* add playground demos for accordion, teleport, morph, and teleport+morph ([e53634d](https://github.com/eldomagan/alpine-define-component/commit/e53634d99ad69733faed30cbbd355973569d4d41))
-
-
-### Bug Fixes
-
-* playground component bugs (accordion getter, modal querySelector, tabs goBack) ([fe37fcb](https://github.com/eldomagan/alpine-define-component/commit/fe37fcbf5fdaaca77a04c72bb2dd377995b1d967))
-
 ## [1.1.0](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.0.2...alpine-define-component-v1.1.0) (2025-11-04)
 
 
