@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import Alpine from 'alpinejs';
-import { defineScope } from '../src/index';
+import { defineScope, INTERNALS } from '../src/index';
 
 describe('defineScope', () => {
   it('should create a scope with the specified name', () => {
-    const scopeHandler = defineScope({
+    const scopeHandler: any = defineScope({
       name: 'myScope',
       setup: () => ({
         value: 'test',
@@ -15,14 +15,14 @@ describe('defineScope', () => {
   });
 
   it('should return x-data binding with scope key', () => {
-    const scopeHandler = defineScope({
+    const scopeHandler: any = defineScope({
       name: 'testScope',
       setup: () => ({
         count: 0,
       }),
     });
 
-    const mockApi = {} as any;
+    const mockApi = { [INTERNALS]: { generateId: (p: string) => p, scopeCounters: {} } } as any;
     const mockEl = document.createElement('div');
     const mockContext = {
       value: null,
@@ -46,12 +46,12 @@ describe('defineScope', () => {
       value: 'test',
     }));
 
-    const scopeHandler = defineScope({
+    const scopeHandler: any = defineScope({
       name: 'myScope',
       setup,
     });
 
-    const mockApi = { someMethod: vi.fn() } as any;
+    const mockApi = { someMethod: vi.fn(), [INTERNALS]: { generateId: (p: string) => p, scopeCounters: {} } } as any;
     const mockEl = document.createElement('div');
     const mockContext = {
       value: 'context-value',
@@ -77,7 +77,7 @@ describe('defineScope', () => {
   it('should provide scoped generateId function', () => {
     let capturedGenerateId: ((s: string) => string) | null = null;
 
-    const scopeHandler = defineScope({
+    const scopeHandler: any = defineScope({
       name: 'myScope',
       setup: (_api, _el, ctx) => {
         capturedGenerateId = ctx.generateId;
@@ -93,7 +93,7 @@ describe('defineScope', () => {
       generateId: (prefix: string) => `parent-${prefix}`,
     };
 
-    scopeHandler({} as any, document.createElement('div'), mockContext);
+    scopeHandler({ [INTERNALS]: { generateId: (p: string) => p, scopeCounters: {} } } as any, document.createElement('div'), mockContext);
 
     expect(capturedGenerateId).toBeInstanceOf(Function);
 
@@ -110,7 +110,7 @@ describe('defineScope', () => {
       'x-bind:data-active': true,
     }));
 
-    const scopeHandler = defineScope({
+    const scopeHandler: any = defineScope({
       name: 'myScope',
       setup: () => ({
         count: 0,
@@ -118,7 +118,7 @@ describe('defineScope', () => {
       bindings,
     });
 
-    const mockApi = { value: 42 } as any;
+    const mockApi = { value: 42, [INTERNALS]: { generateId: (p: string) => p, scopeCounters: {} } } as any;
     const mockEl = document.createElement('div');
     const mockContext = {
       value: null,
@@ -138,7 +138,7 @@ describe('defineScope', () => {
   it('should pass api and scope to bindings function', () => {
     const bindings = vi.fn(() => ({}));
 
-    const scopeHandler = defineScope({
+    const scopeHandler: any = defineScope({
       name: 'myScope',
       setup: () => ({
         scopeValue: 'test',
@@ -146,7 +146,7 @@ describe('defineScope', () => {
       bindings,
     });
 
-    const mockApi = { apiValue: 42 } as any;
+    const mockApi = { apiValue: 42, [INTERNALS]: { generateId: (p: string) => p, scopeCounters: {} } } as any;
     const mockEl = document.createElement('div');
     const mockContext = {
       value: null,
@@ -162,7 +162,7 @@ describe('defineScope', () => {
   });
 
   it('should handle bindings returning undefined', () => {
-    const scopeHandler = defineScope({
+    const scopeHandler: any = defineScope({
       name: 'myScope',
       setup: () => ({}),
       bindings: () => undefined as any,
@@ -176,7 +176,7 @@ describe('defineScope', () => {
       generateId: (prefix: string) => `test-${prefix}`,
     };
 
-    const result = scopeHandler({} as any, document.createElement('div'), mockContext);
+    const result = scopeHandler({ [INTERNALS]: { generateId: (p: string) => p, scopeCounters: {} } } as any, document.createElement('div'), mockContext);
 
     expect(result).toHaveProperty('x-data');
     expect(Object.keys(result).filter((k) => k !== 'x-data')).toHaveLength(0);
@@ -185,7 +185,7 @@ describe('defineScope', () => {
   it('should make scope reactive using Alpine.reactive', () => {
     const reactiveSpy = vi.spyOn(Alpine, 'reactive');
 
-    const scopeHandler = defineScope({
+    const scopeHandler: any = defineScope({
       name: 'myScope',
       setup: () => ({
         count: 0,
@@ -200,13 +200,13 @@ describe('defineScope', () => {
       generateId: (prefix: string) => `test-${prefix}`,
     };
 
-    scopeHandler({} as any, document.createElement('div'), mockContext);
+    scopeHandler({ [INTERNALS]: { generateId: (p: string) => p, scopeCounters: {} } } as any, document.createElement('div'), mockContext);
 
     expect(reactiveSpy).toHaveBeenCalledWith(expect.objectContaining({ count: 0 }));
   });
 
   it('should create unique scope instances', () => {
-    const scopeHandler = defineScope({
+    const scopeHandler: any = defineScope({
       name: 'counter',
       setup: () => ({
         count: 0,
@@ -224,8 +224,11 @@ describe('defineScope', () => {
       generateId: (prefix: string) => `test-${prefix}`,
     };
 
-    const bindings1 = scopeHandler({} as any, document.createElement('div'), mockContext);
-    const bindings2 = scopeHandler({} as any, document.createElement('div'), mockContext);
+    const sharedCounters = {};
+    const mockApi = { [INTERNALS]: { generateId: (p: string) => p, scopeCounters: sharedCounters } } as any;
+
+    const bindings1 = scopeHandler(mockApi, document.createElement('div'), mockContext);
+    const bindings2 = scopeHandler(mockApi, document.createElement('div'), mockContext);
 
     const scope1 = bindings1['x-data']();
     const scope2 = bindings2['x-data']();

@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useId } from '../src/use-id';
+import { useId, resetIds } from '../src/use-id';
 
 describe('useId', () => {
+  beforeEach(() => {
+    resetIds();
+  });
   it('should generate unique IDs with default prefix', () => {
     const id1 = useId();
     const id2 = useId();
@@ -17,11 +20,9 @@ describe('useId', () => {
     const id2 = useId('custom');
     const id3 = useId('custom');
 
-    expect(id1).toMatch(/^custom-\d+$/);
-    expect(id2).toMatch(/^custom-\d+$/);
-    expect(id3).toMatch(/^custom-\d+$/);
-    expect(id1).not.toBe(id2);
-    expect(id2).not.toBe(id3);
+    expect(id1).toBe('custom-1');
+    expect(id2).toBe('custom-2');
+    expect(id3).toBe('custom-3');
   });
 
   it('should maintain separate counters for different prefixes', () => {
@@ -30,10 +31,10 @@ describe('useId', () => {
     const id3 = useId('prefix1');
     const id4 = useId('prefix2');
 
-    expect(id1).toMatch(/^prefix1-\d+$/);
-    expect(id2).toMatch(/^prefix2-\d+$/);
-    expect(id3).toMatch(/^prefix1-\d+$/);
-    expect(id4).toMatch(/^prefix2-\d+$/);
+    expect(id1).toBe('prefix1-1');
+    expect(id2).toBe('prefix2-1');
+    expect(id3).toBe('prefix1-2');
+    expect(id4).toBe('prefix2-2');
   });
 
   it('should increment counter for each call with same prefix', () => {
@@ -56,6 +57,6 @@ describe('useId', () => {
   it('should handle empty string prefix', () => {
     const id = useId('');
 
-    expect(id).toMatch(/^-\d+$/);
+    expect(id).toBe('-1');
   });
 });

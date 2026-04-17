@@ -1,14 +1,19 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Alpine as AlpineType } from 'alpinejs';
 import { defineComponent } from '../src/index';
+import { resetIds } from '../src/use-id';
 
 describe('defineComponent', () => {
+  beforeEach(() => {
+    resetIds();
+  });
   function createMockAlpine(): AlpineType {
     const dataStore = new WeakMap();
     const bindings = new Map();
 
     return {
       magic: vi.fn(),
+
       addRootSelector: vi.fn(),
       prefixed: vi.fn((name: string) => `x-${name}`),
       directive: vi.fn((name, callback) => {
@@ -19,8 +24,7 @@ describe('defineComponent', () => {
       }),
       reactive: vi.fn((obj) => obj),
       bind: vi.fn((el, bindingsObj) => {
-        // Simulate Alpine.bind behavior
-        Object.entries(bindingsObj).forEach(([key, value]) => {
+          Object.entries(bindingsObj).forEach(([key, value]) => {
           if (key === 'x-data' && typeof value === 'function') {
             const data = value();
             dataStore.set(el, data);
@@ -106,10 +110,7 @@ describe('defineComponent', () => {
 
     component(Alpine);
 
-    // Get the directive callback
     const directiveCallback = (Alpine.directive as any).mock.calls[0][1];
-
-    // Simulate Alpine calling the directive
     const mockEl = document.createElement('div');
     const mockContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => {
@@ -117,6 +118,7 @@ describe('defineComponent', () => {
         callback(value);
       },
       cleanup: vi.fn(),
+      effect: vi.fn(),
     };
 
     directiveCallback(mockEl, { value: '', expression: '{ initialValue: 42 }', modifiers: [] }, mockContext);
@@ -141,12 +143,12 @@ describe('defineComponent', () => {
 
     component(Alpine);
 
-    // Get and execute the directive callback
     const directiveCallback = (Alpine.directive as any).mock.calls[0][1];
     const mockEl = document.createElement('div');
     const mockContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback(null),
       cleanup: vi.fn(),
+      effect: vi.fn(),
     };
 
     directiveCallback(mockEl, { value: '', expression: '', modifiers: [] }, mockContext);
@@ -181,12 +183,12 @@ describe('defineComponent', () => {
 
     component(Alpine);
 
-    // Execute the directive callback
     const directiveCallback = (Alpine.directive as any).mock.calls[0][1];
     const mockEl = document.createElement('div');
     const mockContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback(null),
       cleanup: vi.fn(),
+      effect: vi.fn(),
     };
 
     directiveCallback(mockEl, { value: '', expression: '', modifiers: [] }, mockContext);
@@ -208,27 +210,27 @@ describe('defineComponent', () => {
 
     component(Alpine);
 
-    // Execute directive for root
     const directiveCallback = (Alpine.directive as any).mock.calls[0][1];
     const rootEl = document.createElement('div');
     const rootContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback(null),
       cleanup: vi.fn(),
+      effect: vi.fn(),
     };
 
     directiveCallback(rootEl, { value: '', expression: '', modifiers: [] }, rootContext);
 
-    // Store the API in Alpine.$data mock
     const api = (Alpine.reactive as any).mock.results[0].value;
     (Alpine.$data as any).mockReturnValue(api);
 
-    // Execute directive for part with kebab-case name
     const partEl = document.createElement('div');
     const partContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback('test-value'),
       cleanup: vi.fn(),
+      effect: vi.fn((fn: any) => fn()),
     };
 
+    rootEl.appendChild(partEl);
     directiveCallback(partEl, { value: 'my-custom-part', expression: "'test-value'", modifiers: [] }, partContext);
 
     expect(partHandler).toHaveBeenCalled();
@@ -251,28 +253,27 @@ describe('defineComponent', () => {
 
     component(Alpine);
 
-    // Execute directive for root
     const directiveCallback = (Alpine.directive as any).mock.calls[0][1];
     const rootEl = document.createElement('div');
     const rootContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback(null),
       cleanup: vi.fn(),
+      effect: vi.fn(),
     };
 
     directiveCallback(rootEl, { value: '', expression: '', modifiers: [] }, rootContext);
 
-    // Store the API
     const api = (Alpine.reactive as any).mock.results[0].value;
-    (api as any)._generateId = (part: string) => `test-1:${part}`;
     (Alpine.$data as any).mockReturnValue(api);
 
-    // Execute directive for part
     const partEl = document.createElement('div');
     const partContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback('test-value'),
       cleanup: vi.fn(),
+      effect: vi.fn((fn: any) => fn()),
     };
 
+    rootEl.appendChild(partEl);
     directiveCallback(partEl, { value: 'item', expression: "'test-value'", modifiers: ['mod1'] }, partContext);
 
     expect(capturedContext).toBeDefined();
@@ -296,31 +297,29 @@ describe('defineComponent', () => {
 
     component(Alpine);
 
-    // Execute directive for root
     const directiveCallback = (Alpine.directive as any).mock.calls[0][1];
     const rootEl = document.createElement('div');
     const rootContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback(null),
       cleanup: vi.fn(),
+      effect: vi.fn(),
     };
 
     directiveCallback(rootEl, { value: '', expression: '', modifiers: [] }, rootContext);
 
-    // Store the API
     const api = (Alpine.reactive as any).mock.results[0].value;
-    (api as any)._generateId = (part: string) => `test-1:${part}`;
     (Alpine.$data as any).mockReturnValue(api);
 
-    // Execute directive for part
     const partEl = document.createElement('div');
     const partContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback(null),
       cleanup: vi.fn(),
+      effect: vi.fn((fn: any) => fn()),
     };
 
+    rootEl.appendChild(partEl);
     directiveCallback(partEl, { value: 'item', expression: '', modifiers: [] }, partContext);
 
-    // Check that Alpine.bind was called with data-part
     const bindCalls = (Alpine.bind as any).mock.calls;
     const partBindCall = bindCalls.find((call: any) => call[1]['data-part'] === 'item');
 
@@ -343,12 +342,12 @@ describe('defineComponent', () => {
 
     component(Alpine);
 
-    // Execute the directive
     const directiveCallback = (Alpine.directive as any).mock.calls[0][1];
     const mockEl = document.createElement('div');
     const mockContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback(null),
       cleanup: vi.fn(),
+      effect: vi.fn(),
     };
 
     expect(() => {
@@ -375,12 +374,12 @@ describe('defineComponent', () => {
 
     component(Alpine);
 
-    // Execute directive with modifiers
     const directiveCallback = (Alpine.directive as any).mock.calls[0][1];
     const mockEl = document.createElement('div');
     const mockContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback(null),
       cleanup: vi.fn(),
+      effect: vi.fn(),
     };
 
     directiveCallback(mockEl, { value: '', expression: '', modifiers: ['lazy', 'debounce'] }, mockContext);
@@ -405,6 +404,7 @@ describe('defineComponent', () => {
     const mockContext = {
       evaluateLater: (expr: string) => (callback: (val: any) => void) => callback(null),
       cleanup: vi.fn(),
+      effect: vi.fn(),
     };
 
     expect(() => {
