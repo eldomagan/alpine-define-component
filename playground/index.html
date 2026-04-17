@@ -76,6 +76,128 @@
           </div>
         </div>
       </section>
+
+      <!-- Teleported Modal -->
+      <section class="demo-section">
+        <h2>Teleported Modal</h2>
+        <p>Same modal component but with x-teleport. The backdrop is moved to body, proving $modal magic and part bindings work outside the component's DOM subtree.</p>
+
+        <div x-modal="{ open: false }" class="demo-box">
+          <button x-modal:trigger class="btn btn-primary">Open Teleported Modal</button>
+          <p x-show="$modal.isOpen" style="margin-top: 0.5rem; color: #27ae60; font-weight: 500;">Modal is open (this text is inside the component root)</p>
+
+          <template x-teleport="body">
+            <div x-modal:backdrop class="modal-backdrop">
+              <div x-modal:content class="modal-content">
+                <h3>Teleported Modal</h3>
+                <p>This modal's DOM was teleported to body. The $modal magic still works because Alpine preserves the scope chain for teleported elements.</p>
+                <input type="text" placeholder="Type something..." class="input" />
+                <div class="button-group">
+                  <button x-modal:close-trigger class="btn btn-secondary">Close</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+      <!-- Accordion Component -->
+      <section class="demo-section">
+        <h2>Accordion Component</h2>
+        <p>Accordion with defineScope for isolated item state and parts-as-function typing</p>
+
+        <div x-accordion class="demo-box">
+          <div x-accordion:item="'faq-1'" class="accordion-item">
+            <button x-accordion:header class="accordion-trigger">What is defineComponent?</button>
+            <div x-accordion:content class="accordion-content">
+              <p>A helper for building structured Alpine.js components with scoped parts and IDs.</p>
+            </div>
+          </div>
+          <div x-accordion:item="'faq-2'" class="accordion-item">
+            <button x-accordion:header class="accordion-trigger">What is defineScope?</button>
+            <div x-accordion:content class="accordion-content">
+              <p>Creates an isolated reactive scope ($item) within a part, with its own state derived from the expression value.</p>
+            </div>
+          </div>
+          <div x-accordion:item="'faq-3'" class="accordion-item">
+            <button x-accordion:header class="accordion-trigger">Does it work with morph?</button>
+            <div x-accordion:content class="accordion-content">
+              <p>Yes! See the morph demo below.</p>
+            </div>
+          </div>
+          <button @click="$accordion.closeAll()" class="btn btn-secondary" style="margin-top: 0.5rem;">Close All</button>
+        </div>
+      </section>
+
+      <!-- Morph Compatibility Demo -->
+      <section class="demo-section">
+        <h2>Morph Compatibility</h2>
+        <p>Open some accordion items, then click "Morph HTML". State and scoped expressions survive Alpine.morph().</p>
+
+        <div x-data="morphDemo" class="demo-box">
+          <p class="morph-status">
+            Morph count: <span x-text="morphCount"></span> |
+            Dynamic section: "<span x-text="dynamicSection"></span>"
+          </p>
+
+          <div id="morph-target">
+            <div x-accordion>
+              <div x-accordion:item="'intro'" class="accordion-item">
+                <button x-accordion:header class="accordion-trigger">Introduction</button>
+                <div x-accordion:content class="accordion-content">
+                  <p>This is the intro section (static expression).</p>
+                </div>
+              </div>
+              <div x-accordion:item="dynamicSection" class="accordion-item">
+                <button x-accordion:header class="accordion-trigger">Dynamic Item</button>
+                <div x-accordion:content class="accordion-content">
+                  <p>This item's id comes from a reactive variable. Click "Switch Section" to change it.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="button-group" style="margin-top: 1rem;">
+            <button @click="switchSection()" class="btn btn-primary">Switch Section</button>
+            <button @click="doMorph()" class="btn btn-secondary">Morph HTML</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Teleport + Morph -->
+      <section class="demo-section">
+        <h2>Teleport + Morph</h2>
+        <p>Accordion teleported to body, then morphed in place. Tests that defineComponent parts and scoped expressions survive morph inside teleported content.</p>
+
+        <div x-data="teleportMorphDemo" class="demo-box">
+          <p class="morph-status">Morph count: <span x-text="morphCount"></span></p>
+
+          <div class="button-group">
+            <button @click="panelOpen = !panelOpen" class="btn" x-text="panelOpen ? 'Hide Panel' : 'Show Panel'"></button>
+            <button @click="doMorph()" class="btn btn-secondary">Morph Teleported Content</button>
+          </div>
+
+          <template x-teleport="body">
+            <div x-show="panelOpen" class="teleport-panel-wrapper">
+              <div id="teleport-morph-target" class="teleport-panel">
+                <div x-accordion>
+                  <div x-accordion:item="'alpha'" class="accordion-item">
+                    <button x-accordion:header class="accordion-trigger">Alpha</button>
+                    <div x-accordion:content class="accordion-content">
+                      <p>Alpha section inside teleported content.</p>
+                    </div>
+                  </div>
+                  <div x-accordion:item="'beta'" class="accordion-item">
+                    <button x-accordion:header class="accordion-trigger">Beta</button>
+                    <div x-accordion:content class="accordion-content">
+                      <p>Beta section.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
     </div>
 
     <script type="module" src="./app.ts"></script>

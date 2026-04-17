@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carousel Demos - Alpine Define Component</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 2rem;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .demo-section {
+      max-width: 1200px;
+      margin: 0 auto 4rem;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .demo-section h2 {
+      margin-bottom: 0.5rem;
+      color: #111;
+    }
+
+    .demo-section p {
+      margin-bottom: 1.5rem;
+      color: #666;
+    }
+
+    /* Carousel Base Styles */
+    [x-carousel] {
+      position: relative;
+    }
+
+    [x-carousel\:viewport] {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      display: flex;
+    }
+
+    [x-carousel\:viewport]::-webkit-scrollbar {
+      display: none;
+    }
+
+    [x-carousel\:slide] {
+      scroll-snap-align: start;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+
+    [x-carousel\:slide]:not(:last-child) {
+      margin-right: var(--carousel-space-between, 16px);
+    }
+
+    [x-carousel\:slide]:not([data-active]) {
+      opacity: 0.6;
+    }
+
+    /* Demo 1: Basic Carousel */
+    .basic-carousel [x-carousel\:slide] {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    /* Demo 2: Multi-slide Carousel */
+    .multi-carousel [x-carousel\:slide] {
+      width: var(--slide-width, auto);
+      height: 200px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    /* Demo 3: Auto-width Slides */
+    .auto-carousel [x-carousel\:slide] {
+      height: 250px;
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.25rem;
+      font-weight: bold;
+      padding: 0 2rem;
+    }
+
+    .auto-carousel [x-carousel\:slide]:nth-child(1) { width: 300px; }
+    .auto-carousel [x-carousel\:slide]:nth-child(2) { width: 400px; }
+    .auto-carousel [x-carousel\:slide]:nth-child(3) { width: 250px; }
+    .auto-carousel [x-carousel\:slide]:nth-child(4) { width: 350px; }
+    .auto-carousel [x-carousel\:slide]:nth-child(5) { width: 280px; }
+
+    /* Demo 4: Card Carousel */
+    .card-carousel [x-carousel\:slide] {
+      width: 320px;
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .card-carousel .card-image {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+    }
+
+    .card-carousel .card-content {
+      padding: 1.25rem;
+    }
+
+    .card-carousel .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-carousel .card-description {
+      color: #666;
+      line-height: 1.5;
+    }
+
+    /* Navigation Buttons */
+    .carousel-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    [x-carousel\:prev-button],
+    [x-carousel\:next-button] {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    [x-carousel\:prev-button]:hover:not(:disabled),
+    [x-carousel\:next-button]:hover:not(:disabled) {
+      background: #555;
+    }
+
+    [x-carousel\:prev-button]:disabled,
+    [x-carousel\:next-button]:disabled {
+      background: #ddd;
+      cursor: not-allowed;
+      color: #999;
+    }
+
+    /* Pagination Dots */
+    .pagination-dots {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    [x-carousel\:pagination] {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ddd;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    [x-carousel\:pagination][data-active] {
+      background: #333;
+      width: 24px;
+      border-radius: 5px;
+    }
+
+    /* Pagination Fraction */
+    [x-carousel\:pagination-fraction] {
+      text-align: center;
+      margin-top: 1rem;
+      font-weight: 500;
+      color: #666;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      height: 4px;
+      background: #e5e5e5;
+      border-radius: 2px;
+      margin-top: 1rem;
+      overflow: hidden;
+    }
+
+    [x-carousel\:pagination-progress] {
+      height: 100%;
+      background: #333;
+      transition: width 0.3s;
+    }
+
+    /* Screen reader only */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* Responsive - width is now auto-computed via --slide-width CSS variable */
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center; margin-bottom: 2rem;">Carousel Component Demos</h1>
+
+  <!-- Demo 1: Basic Carousel with Navigation -->
+  <div class="demo-section">
+    <h2>1. Basic Carousel</h2>
+    <p>Simple full-width carousel with navigation buttons and dot pagination.</p>
+
+    <div class="basic-carousel" x-carousel="{ slidesPerView: 1, spaceBetween: 16, loop: true }">
+      <div x-carousel:viewport>
+        <div x-carousel:slide>Slide 1</div>
+        <div x-carousel:slide>Slide 2</div>
+        <div x-carousel:slide>Slide 3</div>
+        <div x-carousel:slide>Slide 4</div>
+      </div>
+
+      <div class="carousel-nav">
+        <button x-carousel:prev-button>← Previous</button>
+        <button x-carousel:next-button>Next →</button>
+      </div>
+
+      <div class="pagination-dots">
+        <button x-carousel:pagination="0"></button>
+        <button x-carousel:pagination="1"></button>
+        <button x-carousel:pagination="2"></button>
+        <button x-carousel:pagination="3"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo 2: Multi-slide Carousel -->
+  <div class="demo-section">
+    <h2>2. Multi-slide Carousel</h2>
+    <p>Shows 3 slides at once with responsive breakpoints (2 on tablet, 1 on mobile).</p>
+
+    <div class="multi-carousel" x-carousel="{
+      slidesPerView: 1,
+      spaceBetween: 16,
+      breakpoints: {
+        640: { slidesPerView: 2 },
+        1024: { slidesPerView: 3 }
+      }
+    }">
+      <div x-carousel:viewport>
+        <div x-carousel:slide>1</div>
+        <div x-carousel:slide>2</div>
+        <div x-carousel:slide>3</div>
+        <div x-carousel:slide>4</div>
+        <div x-carousel:slide>5</div>
+        <div x-carousel:slide>6</div>
+        <div x-carousel:slide>7</div>
+        <div x-carousel:slide>8</div>
+      </div>
+
+      <div class="carousel-nav">
+        <button x-carousel:prev-button>← Previous</button>
+        <button x-carousel:next-button>Next →</button>
+      </div>
+
+      <div x-carousel:pagination-fraction></div>
+    </div>
+  </div>
+
+  <!-- Demo 3: Auto-width Slides -->
+  <div class="demo-section">
+    <h2>3. Auto-width Carousel</h2>
+    <p>Each slide has its own width. Perfect for dynamic content.</p>
+
+    <div class="auto-carousel" x-carousel="{ slidesPerView: 'auto', spaceBetween: 16 }">
+      <div x-carousel:viewport>
+        <div x-carousel:slide>Short</div>
+        <div x-carousel:slide>Medium Width</div>
+        <div x-carousel:slide>Small</div>
+        <div x-carousel:slide>Longer Text</div>
+        <div x-carousel:slide>Text</div>
+      </div>
+
+      <div class="carousel-nav">
+        <button x-carousel:prev-button>← Previous</button>
+        <button x-carousel:next-button>Next →</button>
+      </div>
+
+      <div class="progress-container">
+        <div x-carousel:pagination-progress></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo 4: Card Carousel with Autoplay -->
+  <div class="demo-section">
+    <h2>4. Card Carousel with Autoplay</h2>
+    <p>Product cards with autoplay that pauses on hover. Drag to navigate!</p>
+
+    <div class="card-carousel" x-carousel="{
+      slidesPerView: 'auto',
+      spaceBetween: 20,
+      autoplay: { delay: 3000, pauseOnHover: true },
+      draggable: true
+    }">
+      <div x-carousel:viewport>
+        <div x-carousel:slide>
+          <div class="card-image">🎨</div>
+          <div class="card-content">
+            <div class="card-title">Product 1</div>
+            <div class="card-description">Beautiful design with amazing features for your projects.</div>
+          </div>
+        </div>
+
+        <div x-carousel:slide>
+          <div class="card-image">🚀</div>
+          <div class="card-content">
+            <div class="card-title">Product 2</div>
+            <div class="card-description">Fast and reliable performance that scales with you.</div>
+          </div>
+        </div>
+
+        <div x-carousel:slide>
+          <div class="card-image">💡</div>
+          <div class="card-content">
+            <div class="card-title">Product 3</div>
+            <div class="card-description">Innovative solutions for modern challenges.</div>
+          </div>
+        </div>
+
+        <div x-carousel:slide>
+          <div class="card-image">🎯</div>
+          <div class="card-content">
+            <div class="card-title">Product 4</div>
+            <div class="card-description">Precise targeting and excellent results guaranteed.</div>
+          </div>
+        </div>
+
+        <div x-carousel:slide>
+          <div class="card-image">⚡</div>
+          <div class="card-content">
+            <div class="card-title">Product 5</div>
+            <div class="card-description">Lightning fast and powerful tools at your fingertips.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-nav">
+        <button x-carousel:prev-button>← Previous</button>
+        <button x-carousel:next-button>Next →</button>
+      </div>
+
+      <div class="pagination-dots">
+        <button x-carousel:pagination="0"></button>
+        <button x-carousel:pagination="1"></button>
+        <button x-carousel:pagination="2"></button>
+        <button x-carousel:pagination="3"></button>
+        <button x-carousel:pagination="4"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo 5: Centered Slides -->
+  <div class="demo-section">
+    <h2>5. Centered Slides</h2>
+    <p>Active slide is centered with partial views of adjacent slides.</p>
+
+    <div class="multi-carousel" x-carousel="{
+      slidesPerView: 'auto',
+      spaceBetween: 20,
+      loop: true
+    }">
+      <div x-carousel:viewport style="padding: 0 10%;">
+        <div x-carousel:slide style="width: 300px;">Center 1</div>
+        <div x-carousel:slide style="width: 300px;">Center 2</div>
+        <div x-carousel:slide style="width: 300px;">Center 3</div>
+        <div x-carousel:slide style="width: 300px;">Center 4</div>
+        <div x-carousel:slide style="width: 300px;">Center 5</div>
+      </div>
+
+      <div class="carousel-nav">
+        <button x-carousel:prev-button>← Previous</button>
+        <button x-carousel:next-button>Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo 6: Keyboard Navigation -->
+  <div class="demo-section">
+    <h2>6. Keyboard Navigation</h2>
+    <p>Click on the carousel, then use arrow keys to navigate between slides.</p>
+
+    <div class="basic-carousel" x-carousel="{
+      slidesPerView: 1,
+      spaceBetween: 16,
+      keyboard: true
+    }">
+      <div x-carousel:viewport>
+        <div x-carousel:slide style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          Slide 1
+        </div>
+        <div x-carousel:slide style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+          Slide 2
+        </div>
+        <div x-carousel:slide style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+          Slide 3
+        </div>
+        <div x-carousel:slide style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+          Slide 4
+        </div>
+      </div>
+
+      <div x-carousel:pagination-fraction></div>
+    </div>
+  </div>
+
+  <script type="module" src="./carousel-app.ts"></script>
+</body>
+</html>
