@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.3.0...alpine-define-component-v1.4.0) (2026-05-20)
+
+
+### Features
+
+* publish to npm with provenance attestation via OIDC ([832dba3](https://github.com/eldomagan/alpine-define-component/commit/832dba30363e1ec6c108e0a8d320810d1c205e77))
+
 ## [1.3.0](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.2.0...alpine-define-component-v1.3.0) (2026-05-20)
 
 
