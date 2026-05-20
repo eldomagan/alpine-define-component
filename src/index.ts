@@ -89,6 +89,8 @@ export function defineComponent<TApi extends object, TParts extends Record<strin
           Alpine.bind(el, {
             'x-id': () => [name],
             'x-data': () => api,
+            'data-scope': name,
+            'data-part': 'root',
           });
 
           if (typeof parts?.root === 'function') {
@@ -139,6 +141,7 @@ export function defineComponent<TApi extends object, TParts extends Record<strin
       const bindings = handler.call(api as any, api as any, el, context) ?? {};
 
       Alpine.bind(el, {
+        'data-scope': name,
         'data-part': partName,
         ...bindings,
       });

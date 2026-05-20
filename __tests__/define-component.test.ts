@@ -284,7 +284,7 @@ describe('defineComponent', () => {
     expect(capturedContext.generateId).toBeInstanceOf(Function);
   });
 
-  it('should add data-part attribute to part element bindings', () => {
+  it('should add data-scope and data-part attributes to part element bindings', () => {
     const Alpine = createMockAlpine();
 
     const component = defineComponent({
@@ -325,6 +325,7 @@ describe('defineComponent', () => {
 
     expect(partBindCall).toBeDefined();
     expect(partBindCall[1]).toMatchObject({
+      'data-scope': 'test',
       'data-part': 'item',
       'x-bind:class': 'active',
     });

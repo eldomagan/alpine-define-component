@@ -178,7 +178,7 @@ describe('integration: defineComponent with real Alpine', () => {
     expect(rootBindings).toHaveProperty('x-bind:aria-expanded');
   });
 
-  it('should stamp data-{name}-id on root and data-part on parts', () => {
+  it('should stamp data-scope on root and data-scope + data-part on parts', () => {
     const spied = createSpiedAlpine();
 
     const component = defineComponent({
@@ -205,6 +205,8 @@ describe('integration: defineComponent with real Alpine', () => {
     const rootBindCall = spied.bind.mock.calls[0];
     expect(rootBindCall[1]).toHaveProperty('x-id');
     expect(rootBindCall[1]).toHaveProperty('x-data');
+    expect(rootBindCall[1]).toHaveProperty('data-scope', 'accordion');
+    expect(rootBindCall[1]).toHaveProperty('data-part', 'root');
 
     // Part
     const api = spied.reactive.mock.results[0].value;
@@ -221,6 +223,7 @@ describe('integration: defineComponent with real Alpine', () => {
 
     const partBindCall = spied.bind.mock.calls[spied.bind.mock.calls.length - 1];
     expect(partBindCall[1]).toHaveProperty('data-part', 'item');
+    expect(partBindCall[1]).toHaveProperty('data-scope', 'accordion');
   });
 
   it('should create separate instances with unique IDs for multiple components', () => {
