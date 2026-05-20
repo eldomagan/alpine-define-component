@@ -1,6 +1,6 @@
 {
   "name": "alpine-define-component",
-  "version": "1.3.0",
+  "version": "1.2.0",
   "description": "A structured component system for Alpine.js with parts/slots support",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -35,6 +35,14 @@
   ],
   "author": "Eldo Magan",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eldomagan/alpine-define-component.git"
+  },
+  "homepage": "https://github.com/eldomagan/alpine-define-component#readme",
+  "bugs": {
+    "url": "https://github.com/eldomagan/alpine-define-component/issues"
+  },
   "sideEffects": false,
   "peerDependencies": {
     "@types/alpinejs": "^3.13.0",
