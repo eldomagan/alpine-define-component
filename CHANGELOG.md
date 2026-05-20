@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.2.0...alpine-define-component-v1.3.0) (2026-05-20)
+
+
+### Features
+
+* publish to npm with provenance attestation via OIDC ([832dba3](https://github.com/eldomagan/alpine-define-component/commit/832dba30363e1ec6c108e0a8d320810d1c205e77))
+* stamp data-scope and data-part on every component element ([ab47660](https://github.com/eldomagan/alpine-define-component/commit/ab476609a7566146154073be40873e458f4b36b7))
+
+
+### Bug Fixes
+
+* add repository field and revert version to 1.2.0 to retry release ([397dcd9](https://github.com/eldomagan/alpine-define-component/commit/397dcd96da2aa00aab53bd811c4bff1baa394bea))
+
 ## [1.2.0](https://github.com/eldomagan/alpine-define-component/compare/alpine-define-component-v1.1.0...alpine-define-component-v1.2.0) (2026-04-17)
 
 
