@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 jobs:
   release-please:
@@ -32,7 +33,7 @@ jobs:
       # Setup Node.js with npm registry
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
         if: steps.release.outputs.releases_created == 'true'
 
@@ -50,9 +51,8 @@ jobs:
         run: npm test
         if: steps.release.outputs.releases_created == 'true'
 
-      # Publish to npm
+      # Publish to npm (OIDC trusted publishing; requires Trusted Publisher
+      # configured on npmjs.com for this repo + workflow filename)
       - name: Publish to npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance
         if: steps.release.outputs.releases_created == 'true'
